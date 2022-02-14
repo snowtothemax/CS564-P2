@@ -109,7 +109,21 @@ void BufMgr::allocBuf(FrameId& frame) {
 
 void BufMgr::readPage(File& file, const PageId pageNo, Page*& page) {}
 
-void BufMgr::unPinPage(File& file, const PageId pageNo, const bool dirty) {}
+void BufMgr::unPinPage(File& file, const PageId pageNo, const bool dirty) {
+	FrameId frameNo;
+	try{
+		hashTable.lookup(file, pageNo, frameNo);
+		if(bufDescTable[frameNo].pinCnt == 0){
+			throw PageNotPinnedException("buffer.cpp",pageNo, frameNo);
+		}
+		bufDescTable[frameNo].pinCnt--;
+		if(dirty){
+			bufDescTable[frameNo].dirty = true;
+		}
+	}
+	catch(HashNotFoundException &e){
+	}
+}
 
 void BufMgr::allocPage(File& file, PageId& pageNo, Page*& page) {}
 
