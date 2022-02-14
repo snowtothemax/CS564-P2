@@ -107,7 +107,9 @@ void BufMgr::allocBuf(FrameId& frame) {
 
 }
 
-void BufMgr::readPage(File& file, const PageId pageNo, Page*& page) {}
+void BufMgr::readPage(File& file, const PageId pageNo, Page*& page) {
+
+}
 
 /*Decrements the pinCnt of the frame containing (file, PageNo) and, if dirty == true, sets the dirty bit. Throws PAGENOTPINNED if the pin count is already 0. Does nothing if page is not found in the hash table lookup. 
  *
@@ -130,7 +132,50 @@ void BufMgr::unPinPage(File& file, const PageId pageNo, const bool dirty) {
 
 void BufMgr::allocPage(File& file, PageId& pageNo, Page*& page) {}
 
-void BufMgr::flushFile(File& file) {}
+/**
+ * 
+ * Scan bufTable for pages belonging to the file, for each page encountered it should: (a) if the
+page is dirty, call file.writePage() to flush the page to disk and then set the dirty bit for the page
+to false, (b) remove the page from the hashtable (whether the page is clean or dirty) and (c)
+invoke the Clear() method of BufDesc for the page frame. Throws PagePinnedException if some
+page of the file is pinned. Throws BadBufferException if an invalid page belonging to the file is
+encountered.
+ * */
+void BufMgr::flushFile(File& file) {
+
+  //loops through all the frames in the buffer pool, whether they are in file or not
+  for(FrameId frame = 0; frame < numBufs; frame++){
+
+    //now we check for whether or not the page in the frame is in the file, 
+    //if it is then we check if it has been edited
+    if(bufDescTable[frame]->file  == file){
+
+      if(bufDescTable[frame].pinCnt > 0){
+        throw PagePinnedException(bufDescTable[frame].file.filename_, bufDescTable[frame].pageNo, bufDescTable[frame].frameNo);
+        continue;
+      }
+
+      if(!bufDescTable[frame].valid){
+        throw BadBufferException(bufDescTable[frame].frameNo, bufDescTable[frame].dirty, false, bufDescTable[frame].refbit);
+      }
+      
+      //if page is dirty, use writePage() to write to disk
+      if(bufDescTable[frame].dirty){
+        bufDescTable[frame].file.writePage(bufDescTable[clockHand].pageNo)
+        bufDescTable[frame].dirty = false;
+      }
+
+      //removes page whether dirty or clean
+      hashTable.remove(file, bufDescTable[frame].pageNo);
+
+      //clears the page frame
+      bufDescTable[frame].clear();
+    }
+
+  }
+
+
+}
 
 /*
  *
