@@ -109,6 +109,9 @@ void BufMgr::allocBuf(FrameId& frame) {
 
 void BufMgr::readPage(File& file, const PageId pageNo, Page*& page) {}
 
+/*Decrements the pinCnt of the frame containing (file, PageNo) and, if dirty == true, sets the dirty bit. Throws PAGENOTPINNED if the pin count is already 0. Does nothing if page is not found in the hash table lookup. 
+ *
+ */
 void BufMgr::unPinPage(File& file, const PageId pageNo, const bool dirty) {
 	FrameId frameNo;
 	try{
@@ -129,7 +132,24 @@ void BufMgr::allocPage(File& file, PageId& pageNo, Page*& page) {}
 
 void BufMgr::flushFile(File& file) {}
 
-void BufMgr::disposePage(File& file, const PageId PageNo) {}
+/*
+ *
+ *This method deletes a particular page from file. Before deleting the page from file, it makes sure that if the page to be deleted is allocated a frame in the buffer pool, that frame is freed and correspondingly entry from hash table is also removed.
+ *
+ *
+ */
+void BufMgr::disposePage(File& file, const PageId pageNo) {
+	FrameId frameNo;
+	try{
+                hashTable.lookup(file, pageNo, frameNo);
+		bufDescTable[frameNo].clear();
+		hashTable.remove(file, pageNo);
+
+        }
+        catch(HashNotFoundException &e){
+        }
+	file.deletePage(pageNo);
+}
 
 void BufMgr::printSelf(void) {
   int validFrames = 0;
