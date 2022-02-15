@@ -58,7 +58,7 @@ this variable.
  * 
  * */
 void BufMgr::allocBuf(FrameId& frame) {
-	while(true){
+	for(uint32_t i = 0; i<2*numBufs; i++){
   		//First advance the clock like the algorithm says
   		//We advance clockHand and then when we find a valid 
   		//frame we set the frame that was asked to be allocated with the FrameId value of clockHand at the very end
@@ -66,20 +66,20 @@ void BufMgr::allocBuf(FrameId& frame) {
   		//Check to see if this specific frame is a valid set (in the buffer pool), if not, we set it to be valid
   		//then set the frame value as the current clockHand since this is the frame we will use
   		if(!bufDescTable[clockHand].valid){
-			break;
+			frame = clockHand;
+			return;
 		}else if(bufDescTable[clockHand].refbit){
         		bufDescTable[clockHand].refbit = false;
 			continue; //with this implimentation the contue isn't needed and might be removed later, keep in for now
-		}else if(bufDescTable[clockHand].pinCnt > 0){
-			continue;
-		}else {
+		}else if(bufDescTable[clockHand].pinCnt == 0){
 			if(bufDescTable[clockHand].dirty){
         			bufDescTable[clockHand].file.writePage(bufPool[clockHand]);
 			}
-			break;
+			frame = clockHand;
+			return;
 		}
 	}
-   	frame = clockHand;
+	throw BufferExceededException();
 }
 
 void BufMgr::readPage(File& file, const PageId pageNo, Page*& page) {
