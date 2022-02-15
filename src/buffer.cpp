@@ -102,7 +102,7 @@ void BufMgr::readPage(File& file, const PageId pageNo, Page*& page) {
     bufDescTable[frameId].pinCnt++;
     
     // return address to page by reference
-    page = &bufpool[frameId];
+    page = &bufPool[frameId];
   } catch(HashNotFoundException &e){
     // NOT FOUND
     // allocate frame and get the page address
