@@ -123,10 +123,10 @@ void BufMgr::flushFile(File& file) {
 
     //now we check for whether or not the page in the frame is in the file, 
     //if it is then we check if it has been edited
-    if(bufDescTable[frame]->file  == file){
+    if(bufDescTable[frame].file  == file){
 
       if(bufDescTable[frame].pinCnt > 0){
-        throw PagePinnedException(bufDescTable[frame].file.filename_, bufDescTable[frame].pageNo, bufDescTable[frame].frameNo);
+        throw PagePinnedException(bufDescTable[frame].file.filename(), bufDescTable[frame].pageNo, bufDescTable[frame].frameNo);
         continue;
       }
 
@@ -136,7 +136,7 @@ void BufMgr::flushFile(File& file) {
       
       //if page is dirty, use writePage() to write to disk
       if(bufDescTable[frame].dirty){
-        bufDescTable[frame].file.writePage(bufDescTable[clockHand].pageNo)
+        bufDescTable[frame].file.writePage(bufPool[frame]);
         bufDescTable[frame].dirty = false;
       }
 
