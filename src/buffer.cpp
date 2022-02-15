@@ -101,22 +101,22 @@ void BufMgr::readPage(File& file, const PageId pageNo, Page*& page) {
     bufDescTable[frameId]->refbit = true;
     bufDescTable[frameId]->pinCnt++;
     
-    // return page by reference
-    page = frameId;
+    // return address to page by reference
+    page = &bufpool[frameId];
   } catch(HashNotFoundException &e){
     // NOT FOUND
     // allocate frame and get the page address
     allocBuf(frameId);
-    page = frameId;
 
     // read page from file
     Page newPage = file.readPage(pageNo);
 
     // insert into the table and set the hash
     hashTable.insert(file,pageNo,frameId);
-    bufDescTable[frameId].Set(file, pageNo);
+    bufDescTable[frameId]->Set(file, pageNo);
 
-    // set the frame as a new page
+    // set the frame as the read page
+    page = &bufPool[frameId];
     *page = newPage;
 	}
 }
@@ -150,13 +150,13 @@ void BufMgr::allocPage(File& file, PageId& pageNo, Page*& page) {
   // get the frame
   allocBuf(frameId);
 
-  // inserted into hashTable and set the frame
+  // insert into hashTable and set the frame
   hashTable.insert(file, newPage.page_number(), frameId);
-  bufDescTable[frameId].Set(file, newPage.page_number());
+  bufDescTable[frameId]->Set(file, newPage.page_number());
 
-  // return values. Set Page number and page, then return
+  // return values. Set Page number and page in pool, then return
   pageNo = newPage.page_number();
-  page = frameId;
+  page = &bufPool[frameId];
   *page = newPage;
 }
 
