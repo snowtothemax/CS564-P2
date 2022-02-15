@@ -81,8 +81,44 @@ void BufMgr::allocBuf(FrameId& frame) {
 	throw BufferExceededException();
 }
 
+/*
+Read a page from the buffer pool.
+Two Cases: (a) if its already in the pool, set refbit, increment pin count an return frame handle.
+(b) Page is not in the buffer pool. Call allocBuf() to allocate a buffer frame and then
+call the method file.readPage() to read the page from disk into the buffer pool frame.
+Next, insert the page into the hashtable. Finally, invoke Set() on the frame to set it up
+properly. Set() will leave the pinCnt for the page set to 1. Return a pointer to the frame
+containing the page via the page parameter.
+*/
 void BufMgr::readPage(File& file, const PageId pageNo, Page*& page) {
+  FrameId frameId;
+  try {
+    // lookup frame
+    hashTable.lookup(file, pageNo, frameId);
 
+    // FOUND
+    // set the refbit and inc pinCnt
+    bufDescTable[frameId]->refbit = true;
+    bufDescTable[frameId]->pinCnt++;
+    
+    // return page by reference
+    page = frameId;
+  } catch(HashNotFoundException &e){
+    // NOT FOUND
+    // allocate frame and get the page address
+    allocBuf(frameId);
+    page = frameId;
+
+    // read page from file
+    Page newPage = file.readPage(pageNo);
+
+    // insert into the table and set the hash
+    hashTable.insert(file,pageNo,frameId);
+    bufDescTable[frameId].Set(file, pageNo);
+
+    // set the frame as a new page
+    *page = newPage;
+	}
 }
 
 /*Decrements the pinCnt of the frame containing (file, PageNo) and, if dirty == true, sets the dirty bit. Throws PAGENOTPINNED if the pin count is already 0. Does nothing if page is not found in the hash table lookup. 
@@ -104,7 +140,25 @@ void BufMgr::unPinPage(File& file, const PageId pageNo, const bool dirty) {
 	}
 }
 
-void BufMgr::allocPage(File& file, PageId& pageNo, Page*& page) {}
+
+void BufMgr::allocPage(File& file, PageId& pageNo, Page*& page) {
+  FrameId frameId;
+
+  // new space for page in the file
+  Page newPage = file.allocatePage();
+
+  // get the frame
+  allocBuf(frameId);
+
+  // inserted into hashTable and set the frame
+  hashTable.insert(file, newPage.page_number(), frameId);
+  bufDescTable[frameId].Set(file, newPage.page_number());
+
+  // return values. Set Page number and page, then return
+  pageNo = newPage.page_number();
+  page = frameId;
+  *page = newPage;
+}
 
 /**
  * 
