@@ -70,7 +70,6 @@ void BufMgr::allocBuf(FrameId& frame) {
 			return;
 		}else if(bufDescTable[clockHand].refbit){
         		bufDescTable[clockHand].refbit = false;
-			continue; //with this implimentation the contue isn't needed and might be removed later, keep in for now
 		}else if(bufDescTable[clockHand].pinCnt == 0){
 			if(bufDescTable[clockHand].dirty){
         			bufDescTable[clockHand].file.writePage(bufPool[clockHand]);
