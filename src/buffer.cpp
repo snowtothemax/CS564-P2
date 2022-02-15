@@ -58,53 +58,28 @@ this variable.
  * 
  * */
 void BufMgr::allocBuf(FrameId& frame) {
-
-  //First advance the clock like the algorithm says
-  //We advance clockHand and then when we find a valid 
-  //frame we set the frame that was asked to be allocated with the FrameId value of clockHand at the very end
-  advanceClock();
-
-  //Check to see if this specific frame is a valid set (in the buffer pool), if not, we set it to be valid
-  //then set the frame value as the current clockHand since this is the frame we will use
-  if(!bufDescTable[clockHand].valid){
-    Set(bufDescTable[clockHand].file, bufDescTable[clockHand].pageNo);
-    frame = clockHand;
-  }
-
-  else{
-
-    //while this specific frame that clockHand is pointing to is valid, we check the remaining blocks in the algorithm
-    while(bufDescTable[clockHand].valid){
-
-      //if refbit is set to true then it is cleared and method is called recursively. This time it will bypass this check since
-      //it is set to false
-      if(bufDescTable[clockHand].refbit){
-        bufDescTable[clockHand].refbit = false;
-        allocBuf(bufDescTable[clockHand]);
-      }
-
-      if(bufDescTable[clockHand].pinCnt > 0){
-        allocBuf(bufDescTable[clockHand]);
-      }
-
-      //if the page is dirty, we write it back to the disk
-      if(bufDescTable[clockHand].dirty){
-        unPinPage(bufDescTable[clockHand].file, bufDescTable[clockHand].pageNo, true);
-        bufDescTable[clockHand].file.writePage(bufDescTable[clockHand].page_number);
-      }
-
-      if(!bufDescTable[clockHand].dirty){
-        Set(bufDescTable[clockHand].file, bufDescTable[clockHand].pageNo);
-        frame = clockHand;
-      }
-
-      advanceClock();
-    }
-  }
-
-  //we set the frame that was asked to be allocated with the FrameId value of clockHand
-  frame = clockHand;
-
+	while(true){
+  		//First advance the clock like the algorithm says
+  		//We advance clockHand and then when we find a valid 
+  		//frame we set the frame that was asked to be allocated with the FrameId value of clockHand at the very end
+  		advanceClock();
+  		//Check to see if this specific frame is a valid set (in the buffer pool), if not, we set it to be valid
+  		//then set the frame value as the current clockHand since this is the frame we will use
+  		if(!bufDescTable[clockHand].valid){
+			break;
+		}else if(bufDescTable[clockHand].refbit){
+        		bufDescTable[clockHand].refbit = false;
+			continue; //with this implimentation the contue isn't needed and might be removed later, keep in for now
+		}else if(bufDescTable[clockHand].pinCnt > 0){
+			continue;
+		}else {
+			if(bufDescTable[clockHand].dirty){
+        			bufDescTable[clockHand].file.writePage(bufPool[clockHand]);
+			}
+			break;
+		}
+	}
+   	frame = clockHand;
 }
 
 void BufMgr::readPage(File& file, const PageId pageNo, Page*& page) {
