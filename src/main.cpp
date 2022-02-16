@@ -386,8 +386,10 @@ void test7(File &file1)
   {
   }
 
+  bufMgr->flushFile(file1);
+
   std::cout << "Test 7 passed"
             << "\n";
 
-  file1.close();
+  
 }
