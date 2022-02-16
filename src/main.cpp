@@ -147,12 +147,12 @@ void testBufMgr()
     // their preceding tests. So, they have to be run in the following order.
     // Commenting  a particular test requires commenting all tests that follow
     // it else those tests would fail.
-    test1(file1);
-    test2(file1, file2, file3);
-    test3(file4);
-    test4(file4);
-    test5(file5);
-    test6(file1);
+    // test1(file1);
+    // test2(file1, file2, file3);
+    // test3(file4);
+    // test4(file4);
+    // test5(file5);
+    // test6(file1);
     test7(file1);
 
     // Close the files by going out of scope
@@ -373,17 +373,17 @@ void test7(File &file1)
   }
   catch (const InvalidPageException &e)
   {
-
   }
 
   // make sure buf mgr does the same
-  // try {
-  //   bufMgr->readPage(file1, pageno1, testPage);
-  // }
-  // catch (const InvalidPageException &e)
-  // {
-  //   PRINT_ERROR("ERROR :: DISPOSE PAGE ERROR. PAGE STILL EXISTS ON FILE");
-  // }
+  try
+  {
+    bufMgr->readPage(file1, pageno1, testPage);
+  }
+  catch (const InvalidPageException &e)
+  {
+    PRINT_ERROR("ERROR :: DISPOSE PAGE ERROR. PAGE STILL EXISTS ON FILE");
+  }
 
   std::cout << "Test 7 passed"
             << "\n";
