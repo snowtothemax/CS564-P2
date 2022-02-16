@@ -347,7 +347,7 @@ void test7(File &file1)
 {
   // put page in file
   bufMgr->allocPage(file1, pid[pageno1], page);
-  sprintf(tmpbuf, "test.1 Page %u %7.1f", pid[pageno1], (float)pid[pageno1]);
+  sprintf(tmpbuf, "test.7 Page %u %7.1f", pid[pageno1], (float)pid[pageno1]);
   rid[pageno1] = page->insertRecord(tmpbuf);
   bufMgr->unPinPage(file1, pid[pageno1], true);
 
@@ -388,4 +388,6 @@ void test7(File &file1)
 
   std::cout << "Test 7 passed"
             << "\n";
+
+  file1.close();
 }
