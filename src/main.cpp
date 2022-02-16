@@ -147,12 +147,12 @@ void testBufMgr()
     // their preceding tests. So, they have to be run in the following order.
     // Commenting  a particular test requires commenting all tests that follow
     // it else those tests would fail.
-    // test1(file1);
-    // test2(file1, file2, file3);
-    // test3(file4);
-    // test4(file4);
-    // test5(file5);
-    // test6(file1);
+    test1(file1);
+    test2(file1, file2, file3);
+    test3(file4);
+    test4(file4);
+    test5(file5);
+    test6(file1);
     test7(file1);
 
     // Close the files by going out of scope
