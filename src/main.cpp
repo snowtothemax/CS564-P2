@@ -40,6 +40,7 @@ void test3(File &file4);
 void test4(File &file4);
 void test5(File &file4);
 void test6(File &file1);
+void test7(File &file1);
 // Calls the above tests
 void testBufMgr();
 
