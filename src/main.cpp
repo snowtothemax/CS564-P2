@@ -379,10 +379,11 @@ void test7(File &file1)
   try
   {
     bufMgr->readPage(file1, pageno1, testPage);
+
+    PRINT_ERROR("ERROR :: DISPOSE PAGE ERROR. PAGE STILL EXISTS ON FILE");
   }
   catch (const InvalidPageException &e)
   {
-    PRINT_ERROR("ERROR :: DISPOSE PAGE ERROR. PAGE STILL EXISTS ON FILE");
   }
 
   std::cout << "Test 7 passed"
