@@ -208,7 +208,9 @@ void BufMgr::flushFile(File& file) {
 
 /*
  *
- *This method deletes a particular page from file. Before deleting the page from file, it makes sure that if the page to be deleted is allocated a frame in the buffer pool, that frame is freed and correspondingly entry from hash table is also removed.
+ *This method deletes a particular page from file. Before deleting the page from file,
+  it makes sure that if the page to be deleted is allocated a frame in the buffer pool, 
+  that frame is freed and correspondingly entry from hash table is also removed.
  *
  *
  */
